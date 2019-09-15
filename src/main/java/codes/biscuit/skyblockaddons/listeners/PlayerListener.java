@@ -261,18 +261,18 @@ public class PlayerListener {
     public void onInteract(PlayerInteractEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         ItemStack heldItem = e.getEntityPlayer().getHeldItemMainhand();
-        if (main.getUtils().isOnSkyblock() && e.getEntityPlayer() == mc.player && heldItem != null && heldItem.isItemEnchanted()) {
+        if (main.getUtils().isOnSkyblock() && e.getEntityPlayer() == mc.player && heldItem != ItemStack.EMPTY && heldItem.isItemEnchanted()) {
             if (main.getConfigValues().isEnabled(Feature.DISABLE_EMBER_ROD)) {
                 if (heldItem.getItem().equals(Items.BLAZE_ROD) && main.getUtils().getLocation() == EnumUtils.Location.ISLAND) {
-                    e.setCanceled(true);
+                    //PREVENT CRASH ! e.setCanceled(true);
                     return;
                 }
             }
             if (main.getConfigValues().isEnabled(Feature.AVOID_PLACING_ENCHANTED_ITEMS)) {
                 if ((e instanceof PlayerInteractEvent.RightClickBlock || e instanceof PlayerInteractEvent.RightClickEmpty) &&
                         (heldItem.getItem().equals(Items.LAVA_BUCKET) || heldItem.getItem().equals(Items.STRING) ||
-                                heldItem.getItem().equals(Item.getItemFromBlock(Blocks.diamond_block)))) {
-                    e.setCanceled(true);
+                                heldItem.getItem().equals(Item.getItemFromBlock(Blocks.DIAMOND_BLOCK)))) {
+                    //PREVENT CRASH ! e.setCanceled(true);
                 }
             }
         }
@@ -550,9 +550,9 @@ public class PlayerListener {
             }
         }
         if (main.getUtils().isOnSkyblock() && main.getConfigValues().isEnabled(Feature.REPLACE_ROMAN_NUMERALS_WITH_NUMBERS) &&
-                e.toolTip != null && (hoveredItem.isItemEnchanted()||hoveredItem.getItem().equals(Items.potionitem))) {
-            for (int i = 0; i < e.toolTip.size(); i++) {
-                e.toolTip.set(i, main.getUtils().replaceRomanNumerals(e.toolTip.get(i)));
+                e.getToolTip() != null && (hoveredItem.isItemEnchanted() || hoveredItem.getItem().equals(Items.POTIONITEM))) {
+            for (int i = 0; i < e.getToolTip().size(); i++) {
+                e.getToolTip().set(i, main.getUtils().replaceRomanNumerals(e.getToolTip().get(i)));
             }
         }
     }
@@ -562,12 +562,12 @@ public class PlayerListener {
 
     @SubscribeEvent
     public void onGuiOpen(GuiOpenEvent e) {
-        if (e.gui == null && GuiChest.class.equals(lastOpenedInventory)) {
+        if (e.getGui() == null && GuiChest.class.equals(lastOpenedInventory)) {
             lastClosedInv = System.currentTimeMillis();
             lastOpenedInventory = null;
         }
-        if (e.gui != null) {
-            lastOpenedInventory = e.gui.getClass();
+        if (e.getGui() != null) {
+            lastOpenedInventory = e.getGui().getClass();
         }
     }
 

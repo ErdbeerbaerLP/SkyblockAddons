@@ -14,7 +14,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,14 +27,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.awt.*;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.*;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Mixin(GuiContainer.class)
 public class MixinGuiContainer extends GuiScreen {
 
-    @Shadow private Slot theSlot;
+    @Shadow
+    private Slot hoveredSlot;
     private ResourceLocation CHEST_GUI_TEXTURE = new ResourceLocation("textures/gui/container/generic_54.png");
     private EnchantPair reforgeToRender = null;
     private Set<EnchantPair> enchantsToRender = new HashSet<>();
@@ -200,8 +204,8 @@ public class MixinGuiContainer extends GuiScreen {
     @Redirect(method="drawScreen", at=@At(value = "INVOKE", target = "Lnet/minecraft/client/gui/inventory/GuiContainer;drawGradientRect(IIIIII)V", ordinal = 0))
     private void drawGradientRect(GuiContainer guiContainer, int left, int top, int right, int bottom, int startColor, int endColor) {
         SkyblockAddons main = SkyblockAddons.getInstance();
-        int slotNum = theSlot.slotNumber;
-        Container container = mc.thePlayer.openContainer;
+        int slotNum = hoveredSlot.slotNumber;
+        Container container = mc.player.openContainer;
         if (container instanceof ContainerChest) {
             slotNum -= ((ContainerChest)container).getLowerChestInventory().getSizeInventory()-9;
             if (slotNum < 9) return;
@@ -212,7 +216,7 @@ public class MixinGuiContainer extends GuiScreen {
             if (slotNum < 9) return;
         }
         main.getUtils().setLastHoveredSlot(slotNum);
-        if (theSlot != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
+        if (hoveredSlot != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
                 main.getUtils().isOnSkyblock() && main.getConfigValues().getLockedSlots().contains(slotNum)) {
             int red = ConfigColor.RED.getColor(127);
             drawGradientRect(left,top,right,bottom,red,red);
@@ -228,7 +232,7 @@ public class MixinGuiContainer extends GuiScreen {
         if (slot != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
                 main.getUtils().isOnSkyblock()) {
             int slotNum = slot.slotNumber;
-            Container container = mc.thePlayer.openContainer;
+            Container container = mc.player.openContainer;
             if (container instanceof ContainerChest) {
                 slotNum -= ((ContainerChest)container).getLowerChestInventory().getSizeInventory()-9;
                 if (slotNum < 9) return;
@@ -244,7 +248,7 @@ public class MixinGuiContainer extends GuiScreen {
                 GlStateManager.color(1,1,1,0.4F);
                 GlStateManager.enableBlend();
                 Minecraft.getMinecraft().getTextureManager().bindTexture(RenderListener.LOCK);
-                mc.ingameGUI.drawTexturedModalRect(slot.xDisplayPosition, slot.yDisplayPosition, 0, 0, 16, 16);
+                mc.ingameGUI.drawTexturedModalRect(slot.xPos, slot.yPos, 0, 0, 16, 16);
                 GlStateManager.enableLighting();
                 GlStateManager.enableDepth();
             }
@@ -258,7 +262,7 @@ public class MixinGuiContainer extends GuiScreen {
         if (main.getUtils().isOnSkyblock()) {
             if (main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) && (keyCode != 1 && keyCode != this.mc.gameSettings.keyBindInventory.getKeyCode())) {
                 int slot = main.getUtils().getLastHoveredSlot();
-                if (mc.thePlayer.inventory.getItemStack() == null && theSlot != null) {
+                if (mc.player.inventory.getItemStack() == null && hoveredSlot != null) {
                     for (int i = 0; i < 9; ++i) {
                         if (keyCode == this.mc.gameSettings.keyBindsHotbar[i].getKeyCode()) {
                             slot = i + 36; // They are hotkeying, the actual slot is the targeted one, +36 because
@@ -286,7 +290,7 @@ public class MixinGuiContainer extends GuiScreen {
                 }
             }
             if (mc.gameSettings.keyBindDrop.getKeyCode() == keyCode && main.getConfigValues().isEnabled(Feature.STOP_DROPPING_SELLING_RARE_ITEMS)) {
-                if (main.getInventoryUtils().shouldCancelDrop(theSlot)) ci.cancel();
+                if (main.getInventoryUtils().shouldCancelDrop(hoveredSlot)) ci.cancel();
             }
         }
     }

@@ -106,16 +106,16 @@ public class SkyblockAddonsGui extends GuiScreen {
         int x = sr.getScaledWidth()/2;
         int y = 70;
         String text = Message.TAB_FEATURES.getMessage();
-        buttonList.add(new ButtonSwitchTab(x-180, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 180, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.FEATURES, tab));
         text = Message.TAB_FIXES.getMessage();
-        buttonList.add(new ButtonSwitchTab(x-80, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 80, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.FIXES, tab));
         text = Message.TAB_GUI_FEATURES.getMessage();
-        buttonList.add(new ButtonSwitchTab(x-20, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 20, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.GUI_FEATURES, tab));
         text = Message.TAB_GENERAL_SETTINGS.getMessage();
-        buttonList.add(new ButtonSwitchTab(x+90, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x + 90, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.GENERAL_SETTINGS, tab));
     }
 

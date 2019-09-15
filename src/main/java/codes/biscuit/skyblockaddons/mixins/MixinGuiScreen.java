@@ -10,7 +10,6 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +42,7 @@ public abstract class MixinGuiScreen {
                 backpack.setX(x);
                 backpack.setY(y);
                 main.getUtils().setBackpackToRender(backpack);
-                main.getPlayerListener().onItemTooltip(new ItemTooltipEvent(stack, null,null,false));
+                main.getPlayerListener().onItemTooltip(new ItemTooltipEvent(stack, null, null, ITooltipFlag.TooltipFlags.NORMAL));
                 ci.cancel();
             }
         }

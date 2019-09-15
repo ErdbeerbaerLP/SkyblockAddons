@@ -14,7 +14,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,22 +36,22 @@ public class MixinPlayerControllerMP {
     private void onPlayerDamageBlock(BlockPos loc, EnumFacing face, CallbackInfoReturnable<Boolean> cir) {
         SkyblockAddons main = SkyblockAddons.getInstance();
         Minecraft mc = Minecraft.getMinecraft();
-        EntityPlayerSP p = mc.thePlayer;
-        ItemStack heldItem = p.getHeldItem();
-        Block block = mc.theWorld.getBlockState(loc).getBlock();
+        EntityPlayerSP p = mc.player;
+        ItemStack heldItem = p.getHeldItem(EnumHand.MAIN_HAND);
+        Block block = mc.world.getBlockState(loc).getBlock();
         if (heldItem != null) {
-            if (main.getConfigValues().isEnabled(Feature.AVOID_BREAKING_STEMS) && (block.equals(Blocks.melon_stem) || block.equals(Blocks.pumpkin_stem))) {
+            if (main.getConfigValues().isEnabled(Feature.AVOID_BREAKING_STEMS) && (block.equals(Blocks.MELON_STEM) || block.equals(Blocks.PUMPKIN_STEM))) {
                 if (System.currentTimeMillis()- lastStemMessage > 20000) {
                     lastStemMessage = System.currentTimeMillis();
-                    main.getUtils().sendMessage(EnumChatFormatting.RED+Message.MESSAGE_CANCELLED_STEM_BREAK.getMessage());
+                    main.getUtils().sendMessage(TextFormatting.RED + Message.MESSAGE_CANCELLED_STEM_BREAK.getMessage());
                 }
                 cir.setReturnValue(false);
                 return;
             }
         }
-        if (heldItem == null || heldItem.getItem().equals(Items.diamond_hoe) || heldItem.getItem().equals(Items.iron_hoe) || heldItem.getItem().equals(Items.golden_hoe)
-                || heldItem.getItem().equals(Items.wooden_hoe) || heldItem.getItem().equals(Items.wooden_hoe)) {
-            if (main.getConfigValues().isEnabled(Feature.AVOID_BREAKING_BOTTOM_SUGAR_CANE) && (block.equals(Blocks.reeds) && mc.theWorld.getBlockState(loc.down()).getBlock() != Blocks.reeds)) {
+        if (heldItem == null || heldItem.getItem().equals(Items.DIAMOND_HOE) || heldItem.getItem().equals(Items.IRON_HOE) || heldItem.getItem().equals(Items.GOLDEN_HOE)
+                || heldItem.getItem().equals(Items.WOODEN_HOE) || heldItem.getItem().equals(Items.WOODEN_HOE)) {
+            if (main.getConfigValues().isEnabled(Feature.AVOID_BREAKING_BOTTOM_SUGAR_CANE) && (block.equals(Blocks.REEDS) && mc.world.getBlockState(loc.down()).getBlock() != Blocks.REEDS)) {
                 if (System.currentTimeMillis()- lastStemMessage > 20000) {
                     lastStemMessage = System.currentTimeMillis();
                     main.getUtils().sendMessage(TextFormatting.RED + Message.MESSAGE_CANCELLED_STEM_BREAK.getMessage());
@@ -59,16 +61,16 @@ public class MixinPlayerControllerMP {
         }
     }
 
-    @Inject(method = "isPlayerRightClickingOnEntity", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
-    private void onPlayerRightClickEntity(EntityPlayer player, Entity entityIn, MovingObjectPosition movingObject, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "interactWithEntity(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/entity/Entity;Lnet/minecraft/util/EnumHand;)Lnet/minecraft/util/EnumActionResult;", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+    private void onPlayerRightClickEntity(EntityPlayer player, Entity entityIn, EnumHand hand, CallbackInfoReturnable<Boolean> cir) {
         SkyblockAddons main = SkyblockAddons.getInstance();
         if (main.getConfigValues().isEnabled(Feature.DONT_OPEN_PROFILES_WITH_BOW)) {
             if (entityIn instanceof EntityOtherPlayerMP) {
                 ItemStack item = player.inventory.getCurrentItem();
-                if (item != null && item.getItem() != null && item.getItem().equals(Items.bow)) {
+                if (item != null && item.getItem() != null && item.getItem().equals(Items.BOW)) {
                     if (System.currentTimeMillis()- lastProfileMessage > 20000) {
                         lastProfileMessage = System.currentTimeMillis();
-                        main.getUtils().sendMessage(EnumChatFormatting.RED+Message.MESSAGE_STOPPED_OPENING_PROFILE.getMessage());
+                        main.getUtils().sendMessage(TextFormatting.RED + Message.MESSAGE_STOPPED_OPENING_PROFILE.getMessage());
                     }
                     cir.setReturnValue(true);
                 }

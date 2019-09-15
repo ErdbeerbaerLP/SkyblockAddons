@@ -82,16 +82,16 @@ public class SettingsGui extends GuiScreen {
         int x = sr.getScaledWidth()/2;
         int y = 70;
         String text = "Features";
-        buttonList.add(new ButtonSwitchTab(x-180, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 180, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.FEATURES, null));
         text = "Fixes";
-        buttonList.add(new ButtonSwitchTab(x-80, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 80, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.FIXES, null));
         text = "GUI Features";
-        buttonList.add(new ButtonSwitchTab(x-20, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x - 20, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.GUI_FEATURES, null));
         text = "General Settings";
-        buttonList.add(new ButtonSwitchTab(x+90, y, (int)(fontRendererObj.getStringWidth(text)*textScale),
+        buttonList.add(new ButtonSwitchTab(x + 90, y, (int) (fontRenderer.getStringWidth(text) * textScale),
                 14, text, main, EnumUtils.SkyblockAddonsGuiTab.GENERAL_SETTINGS, null));
     }
 
@@ -210,7 +210,7 @@ public class SettingsGui extends GuiScreen {
         double x = width/2;
         GlStateManager.pushMatrix();
         GlStateManager.scale(scale, scale, 1);
-        drawCenteredString(fontRendererObj, text,
+        drawCenteredString(fontRenderer, text,
                 (int)(x/scale)+xOff, (int)(y/scale), color);
         GlStateManager.popMatrix();
     }

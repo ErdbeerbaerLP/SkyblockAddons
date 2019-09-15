@@ -29,7 +29,7 @@ public class ButtonSolid extends ButtonText {
         this.height = height;
     }
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float part) {
         if (feature == Feature.TEXT_STYLE) {
             displayString = main.getConfigValues().getTextStyle().getMessage();
         } if (feature == Feature.WARNING_TIME) {

@@ -9,6 +9,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -23,9 +24,9 @@ public class MixinEntityPlayerSP {
     @Inject(method = "dropItem", at = @At(value = "HEAD"), cancellable = true)
     private void dropOneItemConfirmation(boolean dropAll, CallbackInfoReturnable<EntityItem> cir) {
         SkyblockAddons main = SkyblockAddons.getInstance();
-        ItemStack heldItemStack = Minecraft.getMinecraft().thePlayer.getHeldItem();
+        ItemStack heldItemStack = Minecraft.getMinecraft().player.getHeldItem(EnumHand.MAIN_HAND);
         if (main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) && main.getUtils().isOnSkyblock()) {
-            int slot = Minecraft.getMinecraft().thePlayer.inventory.currentItem+36;
+            int slot = Minecraft.getMinecraft().player.inventory.currentItem + 36;
             if (main.getConfigValues().getLockedSlots().contains(slot)) {
                 main.getUtils().playSound("note.bass", 0.5);
                 SkyblockAddons.getInstance().getUtils().sendMessage(main.getConfigValues().getColor(Feature.DROP_CONFIRMATION).getChatFormatting() +

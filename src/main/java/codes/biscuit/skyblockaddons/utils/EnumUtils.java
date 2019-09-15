@@ -3,8 +3,8 @@ package codes.biscuit.skyblockaddons.utils;
 import codes.biscuit.skyblockaddons.SkyblockAddons;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -249,7 +249,7 @@ public class EnumUtils {
             for (SkyblockNPC npc : values()) {
                 if (npc.locations.contains(SkyblockAddons.getInstance().getUtils().getLocation())) {
                     double x = e.posX; double y = e.posY; double z = e.posZ;
-                    if (npc.hideArea.isVecInside(new Vec3(x, y,z))
+                    if (npc.hideArea.contains(new Vec3d(x, y, z))
                             && (npc.x != x || npc.y != y || npc.z != z)) {
                         return true;
                     }

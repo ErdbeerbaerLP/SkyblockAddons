@@ -4,7 +4,7 @@ import codes.biscuit.skyblockaddons.SkyblockAddons;
 import com.google.gson.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
 import java.awt.geom.Point2D;
@@ -611,11 +611,11 @@ public class ConfigValues {
     // these are taken from GuiOptionSlider
     private float denormalizeScale(float value) {
         return snapToStepClamp(ConfigValues.GUI_SCALE_MINIMUM + (ConfigValues.GUI_SCALE_MAXIMUM - ConfigValues.GUI_SCALE_MINIMUM) *
-                MathHelper.clamp_float(value, 0.0F, 1.0F));
+                MathHelper.clamp(value, 0.0F, 1.0F));
     }
     private float snapToStepClamp(float value) {
         value = ConfigValues.GUI_SCALE_STEP * (float) Math.round(value / ConfigValues.GUI_SCALE_STEP);
-        return MathHelper.clamp_float(value, ConfigValues.GUI_SCALE_MINIMUM, ConfigValues.GUI_SCALE_MAXIMUM);
+        return MathHelper.clamp(value, ConfigValues.GUI_SCALE_MINIMUM, ConfigValues.GUI_SCALE_MAXIMUM);
     }
 
 

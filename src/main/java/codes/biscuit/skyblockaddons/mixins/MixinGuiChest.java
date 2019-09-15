@@ -10,9 +10,9 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -189,7 +189,7 @@ public abstract class MixinGuiChest extends GuiContainer {
         if (slotIn != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
                 main.getUtils().isOnSkyblock()) {
             int slotNum = slotIn.slotNumber;
-            Container container = mc.thePlayer.openContainer;
+            Container container = mc.player.openContainer;
             if (container instanceof ContainerChest) {
                 slotNum -= ((ContainerChest)container).getLowerChestInventory().getSizeInventory()-9;
                 if (slotNum < 9) break out;
@@ -228,7 +228,7 @@ public abstract class MixinGuiChest extends GuiContainer {
         if (main.getUtils().isOnSkyblock() && main.getConfigValues().isEnabled(Feature.SHOW_BACKPACK_PREVIEW) &&
                 main.getConfigValues().isEnabled(Feature.MAKE_BACKPACK_INVENTORIES_COLORED)
         && lowerChestInventory.hasCustomName() && lowerChestInventory.getDisplayName().getUnformattedText().contains("Backpack")) {
-            backpack = Backpack.getFromItem(mc.thePlayer.getHeldItem());
+            backpack = Backpack.getFromItem(mc.player.getHeldItem(EnumHand.MAIN_HAND));
             if (backpack != null) {
                 BackpackColor color = backpack.getBackpackColor();
                 GlStateManager.color(color.getR(), color.getG(), color.getB(), 1);

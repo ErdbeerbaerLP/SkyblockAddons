@@ -33,7 +33,7 @@ public abstract class MixinTileEntityEnderChestRenderer extends TileEntitySpecia
 //        }
 //    }
 
-    @Redirect(method = "renderTileEntityAt",
+    @Redirect(method = "render",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/tileentity/TileEntityEnderChestRenderer;bindTexture(Lnet/minecraft/util/ResourceLocation;)V",
     ordinal = 1))
     private void bindTexture(TileEntityEnderChestRenderer tileEntityEnderChestRenderer, ResourceLocation location) {
