@@ -3,11 +3,13 @@ package codes.biscuit.skyblockaddons.utils;
 import codes.biscuit.skyblockaddons.SkyblockAddons;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.launchwrapper.Launch;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -22,6 +24,7 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.FMLLog;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.awt.*;
 import java.io.BufferedReader;
@@ -44,13 +47,14 @@ public class Utils {
     private Map<Attribute, MutableInt> attributes = new EnumMap<>(Attribute.class);
     private List<String> enchantmentMatch = new LinkedList<>();
     private List<String> enchantmentExclusion = new LinkedList<>();
-    private BackpackInfo backpackToRender = null;
+    private Backpack backpackToRender = null;
     private static boolean onSkyblock = false;
     private EnumUtils.Location location = null;
     private boolean playingSound = false;
     private boolean copyNBT = false;
     private String serverID = "";
     private SkyblockDate currentDate = new SkyblockDate(SkyblockDate.SkyblockMonth.EARLY_WINTER, 1, 1, 1);
+    private int lastHoveredSlot = -1;
 
     private boolean fadingIn;
 
@@ -84,6 +88,8 @@ public class Utils {
     }
 
     private static final Pattern SERVER_REGEX = Pattern.compile("([0-9]{2}/[0-9]{2}/[0-9]{2}) (mini[0-9]{1,3}[A-Za-z])");
+    // english, chinese simplified
+    private static Set<String> skyblockInAllLanguages = Sets.newHashSet("SKYBLOCK","\u7A7A\u5C9B\u751F\u5B58");
 
     public void checkGameLocationDate() {
         boolean foundLocation = false;
@@ -92,7 +98,13 @@ public class Utils {
             Scoreboard scoreboard = mc.world.getScoreboard();
             ScoreObjective sidebarObjective = mc.world.getScoreboard().getObjectiveInDisplaySlot(1);
             if (sidebarObjective != null) {
-                onSkyblock = stripColor(sidebarObjective.getDisplayName()).startsWith("SKYBLOCK");
+                String objectiveName = stripColor(sidebarObjective.getDisplayName());
+                onSkyblock = false;
+                for (String skyblock : skyblockInAllLanguages) {
+                    if (objectiveName.startsWith(skyblock)) {
+                        onSkyblock = true;
+                    }
+                }
                 Collection<Score> collection = scoreboard.getSortedScores(sidebarObjective);
                 List<Score> list = Lists.newArrayList(collection.stream().filter(p_apply_1_ -> p_apply_1_.getPlayerName() != null && !p_apply_1_.getPlayerName().startsWith("#")).collect(Collectors.toList()));
                 if (list.size() > 15) {
@@ -181,7 +193,7 @@ public class Utils {
 
 //    private final Pattern LETTERS = Pattern.compile("[^a-z A-Z]");
     private static final Pattern NUMBERS_SLASHES = Pattern.compile("[^0-9 /]");
-    private static final Pattern LETTERS_NUMBERS = Pattern.compile("[^a-z A-Z:0-9/]");
+    private static final Pattern LETTERS_NUMBERS = Pattern.compile("[^a-z A-Z:0-9/']");
 
     private String keepLettersAndNumbersOnly(String text) {
         return LETTERS_NUMBERS.matcher(text).replaceAll("");
@@ -379,9 +391,9 @@ public class Utils {
                 }
                 JsonObject responseJson = new Gson().fromJson(response.toString(), JsonObject.class);
                 long estimate = responseJson.get("estimate").getAsLong();
-                long currentTime = System.currentTimeMillis();
+                long currentTime = responseJson.get("queryTime").getAsLong();
                 int magmaSpawnTime = (int)((estimate-currentTime)/1000);
-                FMLLog.info("[SkyblockAddons] System time is " + currentTime +", server time estimate is " +
+                FMLLog.info("[SkyblockAddons] Query time was " + currentTime +", server time estimate is " +
                         estimate+". Updating magma boss spawn to be in "+magmaSpawnTime+" seconds.");
 
                 main.getPlayerListener().setMagmaTime(magmaSpawnTime, true);
@@ -430,6 +442,19 @@ public class Utils {
         }).start();
     }
 
+    public String getReforgeFromItem(ItemStack item) {
+        if (item.hasTagCompound()) {
+            NBTTagCompound extraAttributes = item.getTagCompound();
+            if (extraAttributes.hasKey("ExtraAttributes")) {
+                extraAttributes = extraAttributes.getCompoundTag("ExtraAttributes");
+                if (extraAttributes.hasKey("modifier")) {
+                    return WordUtils.capitalizeFully(extraAttributes.getString("modifier"));
+                }
+            }
+        }
+        return null;
+    }
+
     // This reverses the text while leaving the english parts intact and in order.
     // (Maybe its more complicated than it has to be, but it gets the job done.
     String reverseText(String originalText) {
@@ -454,12 +479,34 @@ public class Utils {
         return main.getUtils().removeDuplicateSpaces(newString.toString().trim());
     }
 
+    public boolean cantDropItem(ItemStack item, EnumUtils.Rarity rarity, boolean hotbar) {
+        if (hotbar) {
+            return item.getItem().isDamageable() || (rarity != EnumUtils.Rarity.COMMON && rarity != EnumUtils.Rarity.UNCOMMON)
+                    || (item.hasDisplayName() && item.getDisplayName().contains("Backpack"));
+        } else {
+            return item.getItem().isDamageable() || (rarity != EnumUtils.Rarity.COMMON && rarity != EnumUtils.Rarity.UNCOMMON
+                    && rarity != EnumUtils.Rarity.RARE) || (item.hasDisplayName() && item.getDisplayName().contains("Backpack"));
+        }
+    }
+
+    public String replaceRomanNumerals(String text) {
+        if (text != null && text.startsWith("\u00A75\u00A7o\u00A79")) {
+            text = text.replace(" VI", " 6");
+            text = text.replace(" V", " 5");
+            text = text.replace(" IV", " 4");
+            text = text.replace(" III", " 3");
+            text = text.replace(" II", " 2");
+            text = text.replace(" I", " 1");
+        }
+        return text;
+    }
+
     public boolean isDevEnviroment() {
         return (boolean) Launch.blackboard.get("fml.deobfuscatedEnvironment");
     }
 
     public int getDefaultBlue(int alpha) {
-        return new Color(189, 236, 252, alpha).getRGB();
+        return new Color(160, 225, 229, alpha).getRGB();
     }
 
     public String stripColor(final String input) {
@@ -482,11 +529,11 @@ public class Utils {
         this.fadingIn = fadingIn;
     }
 
-    public BackpackInfo getBackpackToRender() {
+    public Backpack getBackpackToRender() {
         return backpackToRender;
     }
 
-    public void setBackpackToRender(BackpackInfo backpackToRender) {
+    public void setBackpackToRender(Backpack backpackToRender) {
         this.backpackToRender = backpackToRender;
     }
 
@@ -525,4 +572,13 @@ public class Utils {
     public SkyblockDate getCurrentDate() {
         return currentDate;
     }
+
+    public void setLastHoveredSlot(int lastHoveredSlot) {
+        this.lastHoveredSlot = lastHoveredSlot;
+    }
+
+    public int getLastHoveredSlot() {
+        return lastHoveredSlot;
+    }
+
 }

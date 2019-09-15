@@ -6,13 +6,16 @@ import com.mojang.realmsclient.gui.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -21,6 +24,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
+import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -39,8 +43,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 public class PlayerListener {
@@ -50,6 +52,7 @@ public class PlayerListener {
     private long lastBoss = -1;
     private int magmaTick = 1;
     private int timerTick = 1;
+    private long lastScreenOpen = -1;
     private long lastMinionSound = -1;
     private Integer healthUpdate = null;
     private long lastHealthUpdate;
@@ -123,9 +126,14 @@ public class PlayerListener {
                         String[] splitMessage = message.split(" {5}");
                         String healthPart = splitMessage[0];
                         String defencePart = null;
+                        String collectionPart = null;
                         String manaPart;
                         if (splitMessage.length > 2) {
-                            defencePart = splitMessage[1];
+                            if (!splitMessage[1].contains("(")) { // Example Collection Bar: '§c986/986❤     §3+1 Mining (10,714.7/15,000)     §b297/323✎ Mana§r'
+                                defencePart = splitMessage[1];
+                            } else {
+                                collectionPart = splitMessage[1];
+                            }
                             manaPart = splitMessage[2];
                         } else {
                             manaPart = splitMessage[1];
@@ -153,6 +161,10 @@ public class PlayerListener {
                         boolean showMana = main.getConfigValues().isDisabled(Feature.MANA_BAR) && main.getConfigValues().isDisabled(Feature.MANA_TEXT);
                         if (showHealth) {
                             newMessage.append(healthPart);
+                        }
+                        if (collectionPart != null) {
+                            if (showHealth) newMessage.append("     ");
+                            newMessage.append(collectionPart);
                         }
                         if (showDefence) {
                             if (showHealth) newMessage.append("     ");
@@ -244,12 +256,12 @@ public class PlayerListener {
     /**
      * This blocks interaction with Ember Rods on your island, to avoid blowing up chests, and placing enchanted items
      * such as enchanted lava buckets.
-
+    */
     @SubscribeEvent()
     public void onInteract(PlayerInteractEvent e) {
         Minecraft mc = Minecraft.getMinecraft();
         ItemStack heldItem = e.getEntityPlayer().getHeldItemMainhand();
-        if (e.getEntityPlayer() == mc.player && heldItem != null && heldItem.isItemEnchanted()) {
+        if (main.getUtils().isOnSkyblock() && e.getEntityPlayer() == mc.player && heldItem != null && heldItem.isItemEnchanted()) {
             if (main.getConfigValues().isEnabled(Feature.DISABLE_EMBER_ROD)) {
                 if (heldItem.getItem().equals(Items.BLAZE_ROD) && main.getUtils().getLocation() == EnumUtils.Location.ISLAND) {
                     e.setCanceled(true);
@@ -258,12 +270,13 @@ public class PlayerListener {
             }
             if (main.getConfigValues().isEnabled(Feature.AVOID_PLACING_ENCHANTED_ITEMS)) {
                 if ((e instanceof PlayerInteractEvent.RightClickBlock || e instanceof PlayerInteractEvent.RightClickEmpty) &&
-                        (heldItem.getItem().equals(Items.LAVA_BUCKET) || heldItem.getItem().equals(Items.STRING))) {
+                        (heldItem.getItem().equals(Items.LAVA_BUCKET) || heldItem.getItem().equals(Items.STRING) ||
+                                heldItem.getItem().equals(Item.getItemFromBlock(Blocks.diamond_block)))) {
                     e.setCanceled(true);
                 }
             }
         }
-    }*/
+    }
 
     /**
      * The main timer for a bunch of stuff.
@@ -306,8 +319,10 @@ public class PlayerListener {
                             sentUpdate = true;
                         }
 
-                        if (main.getConfigValues().isEnabled(Feature.ITEM_PICKUP_LOG) && mc.currentScreen == null
-                        && main.getPlayerListener().didntRecentlyJoinWorld()) {
+                        if (mc.currentScreen != null) {
+                            lastScreenOpen = System.currentTimeMillis();
+                        } else if (main.getConfigValues().isEnabled(Feature.ITEM_PICKUP_LOG)
+                                    && main.getPlayerListener().didntRecentlyJoinWorld()) {
                             main.getInventoryUtils().getInventoryDifference(p.inventory.mainInventory.toArray(new ItemStack[0]));
                         }
                     }
@@ -338,12 +353,7 @@ public class PlayerListener {
                         lastMinionSound = now;
                         main.getUtils().playSound("random.pop", 1);
                         main.getRenderListener().setSubtitleFeature(Feature.MINION_FULL_WARNING);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                main.getRenderListener().setSubtitleFeature(null);
-                            }
-                        }, main.getConfigValues().getWarningSeconds() * 1000);
+                        main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                     }
                 } else if (main.getConfigValues().isEnabled(Feature.MINION_STOP_WARNING) &&
                         entity.getCustomNameTag().startsWith("\u00A7cI can\'t reach any ")) {
@@ -357,12 +367,7 @@ public class PlayerListener {
                         }
                         main.getRenderListener().setCannotReachMobName(mobName);
                         main.getRenderListener().setSubtitleFeature(Feature.MINION_STOP_WARNING);
-                        new Timer().schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                main.getRenderListener().setSubtitleFeature(null);
-                            }
-                        }, main.getConfigValues().getWarningSeconds() * 1000);
+                        main.getScheduler().schedule(Scheduler.CommandType.RESET_SUBTITLE_FEATURE, main.getConfigValues().getWarningSeconds());
                     }
                 } // Apparently it no longer has a health bar
             }// else if (magmaAccuracy == EnumUtils.MagmaTimerAccuracy.SPAWNED &&
@@ -412,12 +417,7 @@ public class PlayerListener {
                                         lastBoss = System.currentTimeMillis();
                                         main.getRenderListener().setTitleFeature(Feature.MAGMA_WARNING); // Enable warning and disable again in four seconds.
                                         magmaTick = 16; // so the sound plays instantly
-                                        new Timer().schedule(new TimerTask() {
-                                            @Override
-                                            public void run() {
-                                                main.getRenderListener().setTitleFeature(null);
-                                            }
-                                        }, main.getConfigValues().getWarningSeconds() * 1000); // 4 second warning.
+                                        main.getScheduler().schedule(Scheduler.CommandType.RESET_TITLE_FEATURE, main.getConfigValues().getWarningSeconds());
 //                                logServer(mc);
                                     }
                                     magmaAccuracy = EnumUtils.MagmaTimerAccuracy.SPAWNED;
@@ -505,16 +505,16 @@ public class PlayerListener {
     @SubscribeEvent()
     public void onItemTooltip(ItemTooltipEvent e) {
         ItemStack hoveredItem = e.getItemStack();
-
-        if (main.getConfigValues().isEnabled(Feature.SHOW_ITEM_ANVIL_USES)) {
+        if (main.getUtils().isOnSkyblock() && main.getConfigValues().isEnabled(Feature.SHOW_ITEM_ANVIL_USES)) {
             // Anvil Uses ~ original done by Dahn#6036
             if (hoveredItem.hasTagCompound()) {
                 NBTTagCompound nbt = hoveredItem.getTagCompound();
                 if (nbt.hasKey("ExtraAttributes")) {
                     if (nbt.getCompoundTag("ExtraAttributes").hasKey("anvil_uses")) {
                         int insertAt = e.getToolTip().size();
+                        insertAt--; // 1 line for the rarity
                         if (Minecraft.getMinecraft().gameSettings.advancedItemTooltips) {
-                            insertAt -= 3; // 1 line for the item name, 1 line for the nbt, and 1 line for the rarity
+                            insertAt -= 2; // 1 line for the item name, and 1 line for the nbt
                             if (e.getItemStack().isItemDamaged()) {
                                 insertAt--; // 1 line for damage
                             }
@@ -549,6 +549,41 @@ public class PlayerListener {
                 }
             }
         }
+        if (main.getUtils().isOnSkyblock() && main.getConfigValues().isEnabled(Feature.REPLACE_ROMAN_NUMERALS_WITH_NUMBERS) &&
+                e.toolTip != null && (hoveredItem.isItemEnchanted()||hoveredItem.getItem().equals(Items.potionitem))) {
+            for (int i = 0; i < e.toolTip.size(); i++) {
+                e.toolTip.set(i, main.getUtils().replaceRomanNumerals(e.toolTip.get(i)));
+            }
+        }
+    }
+
+    private Class lastOpenedInventory = null;
+    private long lastClosedInv = -1;
+
+    @SubscribeEvent
+    public void onGuiOpen(GuiOpenEvent e) {
+        if (e.gui == null && GuiChest.class.equals(lastOpenedInventory)) {
+            lastClosedInv = System.currentTimeMillis();
+            lastOpenedInventory = null;
+        }
+        if (e.gui != null) {
+            lastOpenedInventory = e.gui.getClass();
+        }
+    }
+
+//    @SubscribeEvent(receiveCanceled = true)
+//    public void onKeyInput(InputEvent.KeyInputEvent e) {
+//        if (main.getLockSlot().isPressed()) {
+//            main.getConfigValues().getLockedSlots().add(main.getUtils().getLastHoveredSlot());
+//        }
+//    }
+
+    public boolean shouldResetMouse() {
+        return System.currentTimeMillis() - lastClosedInv > 100;
+    }
+
+    public boolean didntRecentlyCloseScreen() {
+        return System.currentTimeMillis() - lastScreenOpen > 500;
     }
 
     public boolean didntRecentlyJoinWorld() {
@@ -568,7 +603,7 @@ public class PlayerListener {
         return magmaAccuracy;
     }
 
-    public int getMagmaTime() {
+    int getMagmaTime() {
         return magmaTime;
     }
 
@@ -592,6 +627,7 @@ public class PlayerListener {
         this.magmaAccuracy = magmaAccuracy;
     }
 
+    @SuppressWarnings("unused")
     public void setMagmaTime(int magmaTime, boolean save) {
         this.magmaTime = magmaTime;
 //        main.getConfigValues().setNextMagmaTimestamp(System.currentTimeMillis()+(magmaTime*1000));
