@@ -1,9 +1,13 @@
 package codes.biscuit.skyblockaddons.gui.buttons;
 
 import codes.biscuit.skyblockaddons.SkyblockAddons;
+import codes.biscuit.skyblockaddons.gui.SkyblockAddonsGui;
+import codes.biscuit.skyblockaddons.listeners.PlayerListener;
 import codes.biscuit.skyblockaddons.utils.Feature;
+import codes.biscuit.skyblockaddons.utils.Message;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 
 import java.awt.*;
@@ -28,12 +32,17 @@ public class ButtonSolid extends ButtonText {
         this.width = width;
         this.height = height;
     }
+
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float part) {
-        if (feature == Feature.TEXT_STYLE) {
-            displayString = main.getConfigValues().getTextStyle().getMessage();
-        } if (feature == Feature.WARNING_TIME) {
-            displayString = main.getConfigValues().getWarningSeconds()+"s";
+    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+        if (feature == Feature.ANCHOR_POINT) {
+            if (ButtonLocation.getLastHoveredFeature() == null) {
+                return;
+            }
+            displayString = Message.SETTING_ANCHOR_POINT.getMessage();
+            width = mc.fontRendererObj.getStringWidth(displayString) + 10;
+            ScaledResolution sr = new ScaledResolution(mc);
+            xPosition = sr.getScaledWidth() / 2 - width / 2;
         }
         int alpha;
         float alphaMultiplier = 1F;
@@ -47,7 +56,7 @@ public class ButtonSolid extends ButtonText {
         } else {
             alpha = 255;
         }
-        hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+        hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
         int boxAlpha = 100;
         if (hovered && feature != Feature.WARNING_TIME) boxAlpha = 170;
         // Alpha multiplier is from 0 to 1, multiplying it creates the fade effect.
@@ -59,8 +68,9 @@ public class ButtonSolid extends ButtonText {
         if (hovered && feature != Feature.WARNING_TIME) {
             fontColor = new Color(255, 255, 160, alpha).getRGB();
         }
+        String originalString = displayString;
         float scale = 1;
-        int stringWidth = mc.fontRenderer.getStringWidth(displayString);
+        int stringWidth = mc.fontRendererObj.getStringWidth(displayString);
         float widthLimit = BUTTON_MAX_WIDTH -10;
         if (feature == Feature.WARNING_TIME) {
             widthLimit = 90;
@@ -68,7 +78,12 @@ public class ButtonSolid extends ButtonText {
         if (stringWidth > widthLimit) {
             scale = 1/(stringWidth/widthLimit);
         }
+        if (feature == Feature.ANCHOR_POINT) scale = 1;
         drawButtonBoxAndText(mc, boxColor, scale, fontColor);
+        if (!originalString.equals(displayString) && mc.currentScreen instanceof SkyblockAddonsGui) {
+            main.getUtils().setFadingIn(false);
+            main.getRenderListener().setGuiToOpen(PlayerListener.GUIType.MAIN);
+        }
     }
 
     @Override

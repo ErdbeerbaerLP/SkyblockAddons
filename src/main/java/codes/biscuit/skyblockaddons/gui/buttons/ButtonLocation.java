@@ -29,7 +29,7 @@ public class ButtonLocation extends ButtonFeature {
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
         lastMouseX = mouseX;
         lastMouseY = mouseY;
         // The scale of the GUI
