@@ -13,9 +13,7 @@ import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityMagmaCube;
 import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -253,30 +251,7 @@ public class PlayerListener {
             }
         }
     }
-    /**
-     * This blocks interaction with Ember Rods on your island, to avoid blowing up chests, and placing enchanted items
-     * such as enchanted lava buckets.
-    */
-    @SubscribeEvent()
-    public void onInteract(PlayerInteractEvent e) {
-        Minecraft mc = Minecraft.getMinecraft();
-        ItemStack heldItem = e.getEntityPlayer().getHeldItemMainhand();
-        if (main.getUtils().isOnSkyblock() && e.getEntityPlayer() == mc.player && heldItem != ItemStack.EMPTY && heldItem.isItemEnchanted()) {
-            if (main.getConfigValues().isEnabled(Feature.DISABLE_EMBER_ROD)) {
-                if (heldItem.getItem().equals(Items.BLAZE_ROD) && main.getUtils().getLocation() == EnumUtils.Location.ISLAND) {
-                    //PREVENT CRASH ! e.setCanceled(true);
-                    return;
-                }
-            }
-            if (main.getConfigValues().isEnabled(Feature.AVOID_PLACING_ENCHANTED_ITEMS)) {
-                if ((e instanceof PlayerInteractEvent.RightClickBlock || e instanceof PlayerInteractEvent.RightClickEmpty) &&
-                        (heldItem.getItem().equals(Items.LAVA_BUCKET) || heldItem.getItem().equals(Items.STRING) ||
-                                heldItem.getItem().equals(Item.getItemFromBlock(Blocks.DIAMOND_BLOCK)))) {
-                    //PREVENT CRASH ! e.setCanceled(true);
-                }
-            }
-        }
-    }
+
 
     /**
      * The main timer for a bunch of stuff.
