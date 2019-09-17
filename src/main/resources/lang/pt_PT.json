@@ -4,7 +4,7 @@
     "tab": {
       "features": "Funcionalidades",
       "fixes": "Correções",
-      "guiFeatures": "Funcionalidades do Menu",
+      "guiFeatures": "Funcionalidades da interface",
       "generalSettings": "Definições gerais"
     },
     "settings": "Definições",
@@ -14,9 +14,9 @@
     "skeletonHatBonesBar": "Barra de ossos do Skeleton Helmet",
     "hideFoodAndArmor": "Esconder a barra de comida e armadura",
     "fullInventoryWarning": "Aviso de inventário cheio",
-    "disableEmberRodAbility": "Desligar a Ember Rod na ilha",
+    "disableEmberRodAbility": "Desativar a Ember Rod na ilha",
     "editLocations": "Editar localizações",
-    "guiScale": "Escala da GUI: %scale%",
+    "guiScale": "Escala da interface: %scale%",
     "resetLocations": "Redefinir as localizações",
     "hideDurability": "Esconder a durabilidade das ferramentas",
     "showEnchantmentsReforges": "Encantamentos e Reforges",
@@ -42,7 +42,7 @@
     "healthUpdates": "Número da Diferença de Vida",
     "hidePlayersInLobby": "Esconder jogadores longe no Lobby",
     "darkAuctionTimer": "Tempo da Dark Auction",
-    "magmaBossTimer": "Tempo do Magma Boss",
+    "magmaBossTimer": "Tempo até ao Magma Boss",
     "itemPickupLog": "Registo de recolha de itens",
     "avoidPlacingEnchantedItems": "Evitar colocar itens encantados",
     "avoidBreakingStems": "Evitar partir as sementes",
@@ -58,15 +58,15 @@
     "useVanillaTexture": "Usar a textura do vanilla",
     "textStyle": "Estilo do texto",
     "textStyles": {
-      "one": "Estilo Um",
-      "two": "Estilo Dois"
+      "one": "Estilo 1",
+      "two": "Estilo 2"
     },
     "warningDuration": "Duração do aviso",
-    "dontOpenProfileWithBow": "Don't Open Profile With Bow",
-    "stopDroppingSellingRareItems": "Stop Dropping/Selling Rare Items",
-    "makeBackpackInventoriesColored": "Color Inventories",
-    "avoidBreakingBottomSugarCane": "Avoid Breaking Bottom Sugar Cane",
-    "replaceRomanNumeralsWithNumbers": "Replace Roman Numerals on Items"
+    "dontOpenProfileWithBow": "Não abrir perfis com o arco",
+    "stopDroppingSellingRareItems": "Não dropar/vender itens raros",
+    "makeBackpackInventoriesColored": "Inventários coloridos",
+    "avoidBreakingBottomSugarCane": "Evitar partir a cana de açúcar de baixo",
+    "replaceRomanNumeralsWithNumbers": "Substituir os números romanos nos itens"
   },
   "messages": {
     "dropConfirmation": "Dropa este item outra vez para confirmar!",
@@ -89,8 +89,8 @@
     "slotLocked": "Este slot está bloqueado!",
     "summoningEyeFound": "Summoning Eye!",
     "cancelledStemBreak": "O SkyblockAddons impediu-te de partires esta semente. Usa a tua mão se a quiseres mesmo partir.",
-    "cancelledProfileOpening": "SkyblockAddons has stopped you from opening this player's profile while holding a bow.",
-    "cancelledDropping": "SkyblockAddons has stopped you from dropping this rare item or tool from your hotbar.",
-    "clickMoreTimes": "Click/drop this item %times% more times if you really want to do this."
+    "cancelledProfileOpening": "O SkyblockAddons preveniu-te de abrires o perfil deste jogador enquanto seguras um arco.",
+    "cancelledDropping": "O SkyblockAddons preveniu-te de dropar este item ou ferramenta rara da tua hotbar.",
+    "clickMoreTimes": "Clica/dropa este item mais %times% vezes se quiseres mesmo fazer isto."
   }
 }

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
@@ -190,22 +191,16 @@ public abstract class MixinGuiChest extends GuiContainer {
                 main.getUtils().isOnSkyblock()) {
             int slotNum = slotIn.slotNumber;
             Container container = mc.player.openContainer;
-            if (container instanceof ContainerChest) {
-                slotNum -= ((ContainerChest)container).getLowerChestInventory().getSizeInventory()-9;
-                if (slotNum < 9) break out;
-            } else if (container instanceof ContainerHopper) {
-                slotNum -= 4;
-                if (slotNum < 5) break out;
-            } else if (container instanceof ContainerDispenser) {
-                if (slotNum < 9) break out;
-            }
+            slotNum -= ((ContainerChest)container).getLowerChestInventory().getSizeInventory()-9;
+            if (slotNum < 9) break out; // for chests
             if (main.getConfigValues().getLockedSlots().contains(slotNum)) {
                 main.getUtils().playSound("note.bass", 0.5);
                 return;
             }
         }
         if (main.getConfigValues().isEnabled(Feature.STOP_DROPPING_SELLING_RARE_ITEMS) &&
-                lowerChestInventory.hasCustomName() && EnumUtils.Merchant.isMerchant(lowerChestInventory.getDisplayName().getUnformattedText())) {
+                lowerChestInventory.hasCustomName() && EnumUtils.Merchant.isMerchant(lowerChestInventory.getDisplayName().getUnformattedText())
+                && slotIn != null && slotIn.inventory instanceof InventoryPlayer) {
             if (main.getInventoryUtils().shouldCancelDrop(slotIn)) return;
         }
         super.handleMouseClick(slotIn, slotId, mouseButton, type);
