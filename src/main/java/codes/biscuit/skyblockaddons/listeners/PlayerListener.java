@@ -550,9 +550,9 @@ public class PlayerListener {
             }
         }
         if (main.getUtils().isOnSkyblock() && main.getConfigValues().isEnabled(Feature.REPLACE_ROMAN_NUMERALS_WITH_NUMBERS) &&
-                e.toolTip != null) {
-            for (int i = 0; i < e.toolTip.size(); i++) {
-                e.toolTip.set(i, main.getUtils().replaceRomanNumerals(e.toolTip.get(i)));
+                e.getToolTip() != null) {
+            for (int i = 0; i < e.getToolTip().size(); i++) {
+                e.getToolTip().set(i, main.getUtils().replaceRomanNumerals(e.getToolTip().get(i)));
             }
         }
     }

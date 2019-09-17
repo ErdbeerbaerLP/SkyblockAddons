@@ -4,7 +4,9 @@ import codes.biscuit.skyblockaddons.SkyblockAddons;
 import codes.biscuit.skyblockaddons.utils.Feature;
 import net.minecraft.client.gui.GuiHopper;
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.inventory.*;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(GuiHopper.class)
@@ -15,7 +17,7 @@ public abstract class MixinGuiHopper extends GuiContainer {
     }
 
     @Override
-    protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, int clickType) {
+    protected void handleMouseClick(Slot slotIn, int slotId, int clickedButton, ClickType clickType) {
         SkyblockAddons main = SkyblockAddons.getInstance();
         out:
         if (slotIn != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&

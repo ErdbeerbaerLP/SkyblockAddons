@@ -105,7 +105,7 @@ public class SettingsGui extends GuiScreen {
                         text = Message.TAB_GENERAL_SETTINGS.getMessage();
                         break;
                 }
-                int stringWidth = fontRendererObj.getStringWidth(text);
+                int stringWidth = fontRenderer.getStringWidth(text);
                 buttonList.add(new ButtonSwitchTab((tabX-stringWidth/2)*1.4, 70, (int)(stringWidth*1.4),
                         14, text, main, loopTab, lastTab));
                 collumn++;

@@ -14,16 +14,14 @@ public class MixinRendererLivingEntity {
 
     @Redirect(method = "applyRotations", at = @At(value = "INVOKE",
             target = "Ljava/lang/String;equals(Ljava/lang/Object;)Z", ordinal = 0))
-    private boolean equals(String s, Object anObject) {
-        isCoolPerson = s.equals("Biscut") || s.equals("ErdbeerbaerLP"); //cough absolutely nothing here
-        return s.equals("Dinnerbone") || isCoolPerson;
+    private boolean equals(String dinnerbone, Object s) {
+        isCoolPerson = (s.equals("Biscut") || s.equals("ErdbeerbaerLP")); //cough absolutely nothing changed here
+        return s.equals(dinnerbone) || isCoolPerson;
     } //cough nothing to see here
-
     @Redirect(method = "applyRotations", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/entity/player/EntityPlayer;isWearing(Lnet/minecraft/entity/player/EnumPlayerModelParts;)Z", ordinal = 0))
     private boolean isWearing(EntityPlayer entityPlayer, EnumPlayerModelParts p_175148_1_) {
-        return (!isCoolPerson && entityPlayer.isWearing(p_175148_1_)) ||
-                (isCoolPerson && !entityPlayer.isWearing(p_175148_1_));
+        return isCoolPerson || entityPlayer.isWearing(p_175148_1_);
     }
 }
 

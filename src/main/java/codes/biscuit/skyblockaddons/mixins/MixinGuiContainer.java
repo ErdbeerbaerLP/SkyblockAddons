@@ -217,7 +217,7 @@ public class MixinGuiContainer extends GuiScreen {
             if (slotNum < 9) skipSlot = true;
         }
         main.getUtils().setLastHoveredSlot(slotNum);
-        if (!skipSlot &&  != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
+        if (!skipSlot && hoveredSlot != null && main.getConfigValues().isEnabled(Feature.LOCK_SLOTS) &&
                 main.getUtils().isOnSkyblock() && main.getConfigValues().getLockedSlots().contains(slotNum)) {
             int red = ConfigColor.RED.getColor(127);
             drawGradientRect(left,top,right,bottom,red,red);
